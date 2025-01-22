@@ -1,4 +1,4 @@
-# Simulation implement of HIL-SERL
+# Simulation Implementation of HIL-SERL
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Static Badge](https://img.shields.io/badge/Project-Page-a)](https://hil-serl.github.io/)
@@ -40,21 +40,22 @@ This significantly lowers the barrier to entry, accelerates development, and mak
 
 
 3. **Install Jax as follows:**
-    - For CPU (not recommended):
-        ```bash
-        pip install --upgrade "jax[cpu]"
-        ```
+   
+    For CPU (not recommended):
+     ```bash
+     pip install --upgrade "jax[cpu]"
+     ```
 
-    - For GPU:
-        ```bash
-        pip install --upgrade "jax[cuda12_pip]==0.4.35" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-        ```
+    For GPU:
+     ```bash
+     pip install --upgrade "jax[cuda12_pip]==0.4.35" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+     ```
 
-    - For TPU
-        ```bash
-        pip install --upgrade "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
-        ```
-    - See the [Jax Github page](https://github.com/google/jax) for more details on installing Jax.
+    For TPU
+     ```bash
+     pip install --upgrade "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+     ```
+    See the [Jax Github page](https://github.com/google/jax) for more details on installing Jax.
 
 4. **Install the serl_launcher**
     ```bash
@@ -94,28 +95,40 @@ Here, we will tell you how to use hil-serl to train Franka Arm in Simulation env
 
 1. Change directory to target folder
 
+    ```bash
     cd examples/experiments/pick_cube_sim/
+    ```
 
 2. Try the control the robot in simulation environment. You can familiarize yourself with our simulation environment through a simple demo, such as how humans intervene and control, controlling the robotic arm to complete tasks.
    
+   ```
    python ../../../env_test.py
+   ```
 
    In this setup, we are looking forward from the base of the Franka robot. The control keys are defined as follows:
 
-    `W` Move forward;  `S` Move backward;  `A` Move left; `D` Move right; `J` Move up; `K` Move down; `L` Open/Close gripper; `;` Human intervention open/close
+    `W` Move forward;  `S` Move backward;  `A` Move left; `D` Move right; `J` Move up; `K` Move down; `L` Open/Close gripper; 
+    
+    `;` Human intervention open/close
 
 3. Collect demo data. 20 means we need to collect 20 successful human teleoperation trajectories. Afterwards, the collected trajectories will be saved in the path `examples/experiments/pick_cube_sim/demo_data`.
 
+    ```
     python ../../record_demos.py --exp_name pick_cube_sim --successes_needed 20
+    ```
 
 4. Start human-in-loop RL training. Before runnning the following two bash file, you need to check and update `run_actor.sh` and `run_learner.sh`. For example the *exp_name* must be one of the folder name in experiments, the *demo_path* need to be the absolute path of your `.pkl` file(not relative path).
 
+    ```
     bash run_actor.sh --checkpoint_path first_run
     bash run_learner.sh
+    ```
 
 5. Evaluate our final policy. You can modify the parameters according to your needs.
 
+    ```
     bash run_actor.sh --eval_checkpoint_step=30000 and --eval_n_trajs=100 --checkpoint_path=first_run
+    ```
 
 
 ## Results
