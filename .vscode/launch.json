@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // {
+        //     "name": "Python remote attach",
+        //     "type": "debugpy",
+        //     "request": "attach",
+        //     "connect": {
+        //         "host": "localhost",
+        //         "port": 10010
+        //     },
+        //     "justMyCode": false,
+        //     "pathMappings": [
+        //         {
+        //             "localRoot": "${workspaceFolder}",
+        //             "remoteRoot": "."
+        //         }
+        //     ]
+        // },
+        {
+            "name": "Attach",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 10010
+            },
+            "justMyCode": false
+        },
+        {
+            "name": "Python: 当前文件",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+    ],
+}
