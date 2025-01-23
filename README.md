@@ -130,6 +130,15 @@ Here, we will tell you how to use hil-serl to train Franka Arm in Simulation env
     bash run_actor.sh --eval_checkpoint_step=30000 and --eval_n_trajs=100 --checkpoint_path=first_run
     ```
 
+## Quick Start by our checkpoints
+
+You can also [download](https://drive.google.com/drive/folders/11HDRZKiSI2LNwMpuy2hjLqwbdHWZ2hOH?usp=drive_link) and utilize our pre-trained models to quickly test the performance and compare the results. To do so, move the downloaded `first_run` folder to the directory `examples/experiments/pick_cube_sim/first_run`, and then use the following code to evaluate the results
+
+```
+cd examples/experiments/pick_cube_sim/
+bash run_actor.sh --eval_checkpoint_step=30000 and --eval_n_trajs=100 --checkpoint_path=first_run
+```
+
 
 ## Results
 After 30000 steps of training(about 1 hours) and human's intervention, our policy can achieve 100% of success in pick_cube_sim environment. Here is our training curve and final policy out come.
