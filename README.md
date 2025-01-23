@@ -98,11 +98,9 @@ Here, we will tell you how to use hil-serl to train Franka Arm in Simulation env
    python ../../../env_test.py
    ```
 
-   In this setup, we are looking forward from the base of the Franka robot. The control keys are defined as follows:
+   In this setup, we are looking forward from the base of the Franka robot, while the control keys are defined as follows:
 
-    `W` Move forward;  `S` Move backward;  `A` Move left; `D` Move right; `J` Move up; `K` Move down; `L` Open/Close gripper; 
-    
-    `;` Human intervention open/close
+    `W` Move forward;  `S` Move backward;  `A` Move left; `D` Move right; `J` Move up; `K` Move down; `L` Open/Close gripper; `;` Enable/disable human intervention mode
 
 3. Collect demo data. 20 means we need to collect 20 successful human teleoperation trajectories. Afterwards, the collected trajectories will be saved in the path `examples/experiments/pick_cube_sim/demo_data`.
 
