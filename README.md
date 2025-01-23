@@ -18,12 +18,26 @@ We then collect a small set of demonstrations, which is added to the demo buffer
 During online training, we use the binary classifier as a sparse reward signal and provide human interventions. Initially, we provide more frequent interventions to demonstrate ways of solving the task from various states and prevent the robot from performing undesirable behavior. We gradually reduce the amount of interventions as the policy reaches higher success rate and faster cycle times.
 
 ## Our main Contribution
-Our project extends the hil-serl framework, which is designed for real-world robotic tasks using the Franka robot. The original implementation requires physical hardware and relies on neural networks to evaluate task success, making it challenging for developers to test and adapt the code for their specific needs. 
+Our project extends the [hil-serl](https://hil-serl.github.io/) framework, which is designed for real-world robotic tasks using the Franka robot. The original implementation requires physical hardware and relies on neural networks to evaluate task success, making it challenging for developers to test and adapt the code for their specific needs. 
 
-To address these limitations, we developed a simulation environment based on the suggestion from this [issue](https://github.com/rail-berkeley/serl/issues/37). By adapting the [SERL](https://github.com/rail-berkeley/serl) codebase, we created a lightweight simulation environment that allows developers to test and debug their implementations without needing physical hardware. 
+By adapting the [SERL](https://github.com/rail-berkeley/serl) codebase, we created a lightweight simulation environment that allows developers to test and debug their implementations without needing physical hardware. Building on this, users can control the Franka robot via `keyboard`(not spacemouse) to collect small-scale pre-training data. Through iterative human-in-the-loop online reinforcement learning, the system achieves a 100% success rate for vision-based robotic grasping.
 
 This significantly lowers the barrier to entry, accelerates development, and makes the hil-serl framework more accessible to researchers and developers.
 
+
+
+## Results
+After 30000 steps of training and human's intervention(about 1 hours), our policy can achieve 100% of success in pick_cube_sim environment. The Here is our training curve and final policy out come.
+
+
+
+![](docs/images/trainig_curve.png)
+<div style="text-align:center;">Training Curve</div>
+
+
+
+![](docs/images/policy_performance.gif)
+<div style="text-align:center;">Policy Performance</div>
 
 
 
@@ -65,29 +79,8 @@ This significantly lowers the barrier to entry, accelerates development, and mak
     ```
 
 
-## Overview and Code Structure
 
-HIL-SERL provides a set of common libraries for users to train RL policies for robotic manipulation tasks. The main structure of running the RL experiments involves having an actor node and a learner node, both of which interact with the robot gym environment. Both nodes run asynchronously, with data being sent from the actor to the learner node via the network using [agentlace](https://github.com/youliangtan/agentlace). The learner will periodically synchronize the policy with the actor. This design provides flexibility for parallel training and inference.
 
-<!-- <p align="center">
-  <img src="./docs/images/software_design.png" width="80%"/>
-</p> -->
-
-**Table for code structure**
-
-| Code Directory | Description |
-| --- | --- |
-| [examples](examples) | Scripts for policy training, demonstration data collection, reward classifier training |
-| [serl_launcher](/serl_launcher) | Main code for HIL-SERL |
-| [serl_launcher.agents](/serl_launcher/serl_launcher/agents/) | Agent Policies (e.g. SAC, BC) |
-| [serl_launcher.wrappers](/serl_launcher/serl_launcher/wrappers) | Gym env wrappers |
-| [serl_launcher.data](serl_launcher/serl_launcher/data) | Replay buffer and data store |
-| [serl_launcher.vision](serl_launcher/serl_launcher/vision) | Vision related models and utils |
-| [serl_robot_infra](./serl_robot_infra/) | Robot infra for running with real robots |
-| [serl_robot_infra.robot_servers](serl_robot_infra/robot_servers/) | Flask server for sending commands to robot via ROS |
-| [serl_robot_infra.franka_env](/serl_robot_infra/franka_env/) | Gym env for Franka robot |
-| [examples.experiments.pick_cube_sim](examples/experiments/pick_cube_sim)| Scripts and configuration file for simulation training.
-| [franka_sim](franka_sim)| Main code to build up simulation environment.
 
 ## Quick Start
 
@@ -140,18 +133,32 @@ bash run_actor.sh --eval_checkpoint_step=30000 and --eval_n_trajs=100 --checkpoi
 ```
 
 
-## Results
-After 30000 steps of training(about 1 hours) and human's intervention, our policy can achieve 100% of success in pick_cube_sim environment. Here is our training curve and final policy out come.
+
+## Overview and Code Structure
+
+HIL-SERL provides a set of common libraries for users to train RL policies for robotic manipulation tasks. The main structure of running the RL experiments involves having an actor node and a learner node, both of which interact with the robot gym environment. Both nodes run asynchronously, with data being sent from the actor to the learner node via the network using [agentlace](https://github.com/youliangtan/agentlace). The learner will periodically synchronize the policy with the actor. This design provides flexibility for parallel training and inference.
+
+<!-- <p align="center">
+  <img src="./docs/images/software_design.png" width="80%"/>
+</p> -->
+
+**Table for code structure**
+
+| Code Directory | Description |
+| --- | --- |
+| [examples](examples) | Scripts for policy training, demonstration data collection, reward classifier training |
+| [serl_launcher](/serl_launcher) | Main code for HIL-SERL |
+| [serl_launcher.agents](/serl_launcher/serl_launcher/agents/) | Agent Policies (e.g. SAC, BC) |
+| [serl_launcher.wrappers](/serl_launcher/serl_launcher/wrappers) | Gym env wrappers |
+| [serl_launcher.data](serl_launcher/serl_launcher/data) | Replay buffer and data store |
+| [serl_launcher.vision](serl_launcher/serl_launcher/vision) | Vision related models and utils |
+| [serl_robot_infra](./serl_robot_infra/) | Robot infra for running with real robots |
+| [serl_robot_infra.robot_servers](serl_robot_infra/robot_servers/) | Flask server for sending commands to robot via ROS |
+| [serl_robot_infra.franka_env](/serl_robot_infra/franka_env/) | Gym env for Franka robot |
+| [examples.experiments.pick_cube_sim](examples/experiments/pick_cube_sim)| Scripts and configuration file for simulation training.
+| [franka_sim](franka_sim)| Main code to build up simulation environment.
 
 
-
-![](docs/images/trainig_curve.png)
-<div style="text-align:center;">Training Curve</div>
-
-
-
-![](docs/images/policy_performance.gif)
-<div style="text-align:center;">Policy Performance</div>
 
 ## Citation
 
