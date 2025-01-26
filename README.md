@@ -46,12 +46,14 @@ After 30000 steps of training and human's intervention(about 1 hours), our polic
     create an environment with
     ```bash
     conda create -n hilserl python=3.10
+    conda activate hilserl
     ```
 
 2. **Install pytorch**
    
+   ```
    pip install torch==2.3.0 torchvision==0.18.0 torchaudio==2.3.0 --index-url https://download.pytorch.org/whl/cu121 -i https://pypi.tuna.tsinghua.edu.cn/simple
-
+   ```
 
 3. **Install Jax as follows:**
    
@@ -78,8 +80,11 @@ After 30000 steps of training and human's intervention(about 1 hours), our polic
     pip install -r requirements.txt
     ```
 
+5. **Install the requirement**
 
-
+    ```
+    pip install -r requirement.txt
+    ```
 
 
 ## Quick Start
