@@ -78,12 +78,20 @@ After 30000 steps of training and human's intervention(about 1 hours), our polic
     cd serl_launcher
     pip install -e .
     pip install -r requirements.txt
+    cd ..
     ```
 
-5. **Install the requirement**
+5. **Install the Franka_sim**
+    ```
+    cd franka_sim
+    pip install -e .
+    ```
+
+
+6. **Install the requirement**
 
     ```
-    pip install -r requirement.txt
+    pip install -r requirements.txt
     ```
 
 
