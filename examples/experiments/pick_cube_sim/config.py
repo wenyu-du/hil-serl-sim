@@ -1,8 +1,9 @@
 import os
 import jax
+import time
 import jax.numpy as jnp
 import numpy as np
-
+import franka_env.envs.touch_expert as touch_expert
 from franka_env.envs.wrappers import (
     Quat2EulerWrapper,
     SpacemouseIntervention,
@@ -117,8 +118,8 @@ class TrainConfig(DefaultTrainingConfig):
         # env = GripperCloseEnv(env)
         if not fake_env:
             # env = SpacemouseIntervention(env)
-            env = KeyBoardIntervention2(env)
-            pass
+            # env = KeyBoardIntervention2(env)
+            env = TouchIntervention(env)
         # env = RelativeFrame(env)
         # env = Quat2EulerWrapper(env)
         env = SERLObsWrapper(env, proprio_keys=self.proprio_keys)
@@ -248,6 +249,7 @@ class KeyBoardIntervention2(gym.ActionWrapper):
             filtered_expert_a[self.action_indices] = expert_a[self.action_indices]
             expert_a = filtered_expert_a
         if self.intervened:
+            print(expert_a)
             return expert_a, True
         else:
             return action, False
@@ -266,3 +268,73 @@ class KeyBoardIntervention2(gym.ActionWrapper):
         obs, info = self.env.reset(**kwargs)
         self.gripper_state = 'open'
         return obs, info
+
+class TouchIntervention(gym.ActionWrapper):
+    def __init__(self, env, action_indices=None, position_scale=100, rotation_scale=100):
+        super().__init__(env)
+        
+        self.gripper_enabled = True
+        if self.action_space.shape == (6,):
+            self.gripper_enabled = False
+            
+        self.action_indices = action_indices
+        self.intervened = False
+        self.env.intervened = self.intervened
+        
+        # 初始化Geomagic Touch控制器
+        self.touch_expert = touch_expert.GeomagicExpert(
+            position_scale=position_scale,
+            rotation_scale=rotation_scale
+        )
+        self.gripper_state = 'open'
+        
+    def action(self, action: np.ndarray) -> np.ndarray:
+        # 获取Touch设备的动作和按钮状态
+        expert_a, buttons = self.touch_expert.get_action()
+        
+        # 处理夹爪控制
+        if self.gripper_enabled:
+            # 使用灰色按钮(buttons[0])控制夹爪
+            if buttons[0] == 1:
+                if self.gripper_state == 'open':
+                    self.gripper_state = 'close'
+                else:
+                    self.gripper_state = 'open'
+                    
+            gripper_action = np.random.uniform(0.9, 1, size=(1,)) if self.gripper_state == 'close' else np.random.uniform(-1, -0.9, size=(1,))
+            expert_a = np.concatenate((expert_a, gripper_action), axis=0)
+            
+        # 使用白色按钮(buttons[1])切换干预状态
+        if buttons[1] == 1:
+            self.intervened = not self.intervened
+            time.sleep(0.5)
+            self.env.intervened = self.intervened
+            print(f"Intervention toggled: {self.intervened}")
+            
+        if self.action_indices is not None:
+            filtered_expert_a = np.zeros_like(expert_a)
+            filtered_expert_a[self.action_indices] = expert_a[self.action_indices]
+            expert_a = filtered_expert_a
+            
+        if self.intervened:
+            print(expert_a)
+            return expert_a, True
+            
+        else:
+            return action, False
+            
+    def step(self, action):
+        new_action, replaced = self.action(action)
+        obs, rew, done, truncated, info = self.env.step(new_action)
+        if replaced:
+            info["intervene_action"] = new_action
+        return obs, rew, done, truncated, info
+        
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self.gripper_state = 'open'
+        return obs, info
+        
+    def close(self):
+        self.touch_expert.close()
+        return super().close()
