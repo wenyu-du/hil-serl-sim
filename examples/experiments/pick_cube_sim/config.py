@@ -291,6 +291,7 @@ class TouchIntervention(gym.ActionWrapper):
     def action(self, action: np.ndarray) -> np.ndarray:
         # 获取Touch设备的动作和按钮状态
         expert_a, buttons = self.touch_expert.get_action()
+        # return expert_a, True
         
         # 处理夹爪控制
         if self.gripper_enabled:
@@ -306,22 +307,25 @@ class TouchIntervention(gym.ActionWrapper):
             
         # 使用白色按钮(buttons[1])切换干预状态
         if buttons[1] == 1:
-            self.intervened = not self.intervened
-            time.sleep(0.5)
-            self.env.intervened = self.intervened
-            print(f"Intervention toggled: {self.intervened}")
-            
-        if self.action_indices is not None:
-            filtered_expert_a = np.zeros_like(expert_a)
-            filtered_expert_a[self.action_indices] = expert_a[self.action_indices]
-            expert_a = filtered_expert_a
-            
-        if self.intervened:
-            print(expert_a)
+            # self.intervened = not self.intervened
+            # self.env.intervened = self.intervened
+            # print(f"Intervention toggled: {self.intervened}")
+            print("Intervention toggled: True")
             return expert_a, True
             
+        # if self.action_indices is not None:
+        #     filtered_expert_a = np.zeros_like(expert_a)
+        #     filtered_expert_a[self.action_indices] = expert_a[self.action_indices]
+        #     expert_a = filtered_expert_a
+            
+        # if self.intervened:
+        #     print(expert_a)
+        #     return expert_a, True
+            
         else:
+            print("Intervention toggled: False")
             return action, False
+        
             
     def step(self, action):
         new_action, replaced = self.action(action)
