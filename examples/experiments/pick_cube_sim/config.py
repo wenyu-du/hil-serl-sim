@@ -270,7 +270,7 @@ class KeyBoardIntervention2(gym.ActionWrapper):
         return obs, info
 
 class TouchIntervention(gym.ActionWrapper):
-    def __init__(self, env, action_indices=None, position_scale=100, rotation_scale=100):
+    def __init__(self, env, action_indices=None, position_scale=50, rotation_scale=50):
         super().__init__(env)
         
         self.gripper_enabled = True
