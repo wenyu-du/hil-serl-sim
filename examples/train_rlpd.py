@@ -232,12 +232,12 @@ def actor(agent, data_store, intvn_data_store, env, sampling_rng):
             if not os.path.exists(demo_buffer_path):
                 os.makedirs(demo_buffer_path)
             with open(os.path.join(buffer_path, f"transitions_{step}.pkl"), "wb") as f:
-                pkl.dump(transitions, f)
+                # pkl.dump(transitions, f)
                 transitions = []
             with open(
                 os.path.join(demo_buffer_path, f"transitions_{step}.pkl"), "wb"
             ) as f:
-                pkl.dump(demo_transitions, f)
+                # pkl.dump(demo_transitions, f)
                 demo_transitions = []
 
         timer.tock("total")
