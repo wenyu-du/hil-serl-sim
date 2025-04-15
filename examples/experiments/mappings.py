@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, "/home/ae/dwy/hil-serl-sim")
 from experiments.ram_insertion.config import TrainConfig as RAMInsertionTrainConfig
 from experiments.usb_pickup_insertion.config import TrainConfig as USBPickupInsertionTrainConfig
 from experiments.object_handover.config import TrainConfig as ObjectHandoverTrainConfig

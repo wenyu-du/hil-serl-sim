@@ -124,7 +124,7 @@ class GeomagicSubscriber(Node):
             return np.zeros(6)
 
         # 计算位置增量，考虑时间差
-        position_delta = (current_position - np.array(self.last_position)) * self.position_scale * (0.05 / dt)
+        position_delta = (current_position - np.array(list(self.last_position))) * self.position_scale * (0.05 / dt)
 
         # 计算姿态增量，考虑时间差
         last_rot = Rotation.from_quat(self.last_quaternion)

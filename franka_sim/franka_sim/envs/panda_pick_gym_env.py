@@ -287,7 +287,7 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         # terminated = self.time_limit_exceeded()
         self.env_step += 1
         terminated = False
-        if self.env_step >= 500:
+        if self.env_step >= 1000:
             terminated = True
 
         if self.render_mode == "human":
