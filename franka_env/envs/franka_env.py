@@ -223,8 +223,9 @@ class FrankaEnv(gym.Env):
 
         gripper_action = action[6] * self.action_scale[2]
 
-        self._send_gripper_command(gripper_action)
-        self._send_pos_command(self.clip_safety_box(self.nextpos))
+        # self._send_gripper_command(gripper_action)
+        # self._send_pos_command(self.clip_safety_box(self.nextpos))
+        self._send_pos_command(self.nextpos)
 
         self.curr_path_length += 1
         dt = time.time() - start_time
@@ -447,7 +448,7 @@ class FrankaEnv(gym.Env):
 
         self.currforce = np.array(ps["force"])
         self.currtorque = np.array(ps["torque"])
-        self.currjacobian = np.reshape(np.array(ps["jacobian"]), (6, 7))
+        # self.currjacobian = np.reshape(np.array(ps["jacobian"]), (6, 7))
 
         self.q = np.array(ps["q"])
         self.dq = np.array(ps["dq"])

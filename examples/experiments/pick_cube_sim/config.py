@@ -20,23 +20,23 @@ from serl_launcher.networks.reward_classifier import load_classifier_func
 # from experiments.config import DefaultTrainingConfig
 # from experiments.ram_insertion.wrapper import RAMEnv
 from examples.experiments.config import DefaultTrainingConfig
-from examples.experiments.ram_insertion.wrapper import RAMEnv
+from examples.experiments.pick_cube_sim.wrapper import RAMEnv
 
 from franka_sim.envs.panda_pick_gym_env import PandaPickCubeGymEnv
 
 class EnvConfig(DefaultEnvConfig):
-    SERVER_URL = "http://127.0.0.2:5000/"
+    SERVER_URL = "http://127.0.0.1:5000/"
     REALSENSE_CAMERAS = {
         "wrist_1": {
-            "serial_number": "127122270146",
+            "serial_number": "052622071155",
             "dim": (1280, 720),
             "exposure": 40000,
         },
-        "wrist_2": {
-            "serial_number": "127122270350",
-            "dim": (1280, 720),
-            "exposure": 40000,
-        },
+        # "wrist_2": {
+        #     "serial_number": "127122270350",
+        #     "dim": (1280, 720),
+        #     "exposure": 40000,
+        # },
     }
     IMAGE_CROP = {
         "wrist_1": lambda img: img[150:450, 350:1100],
@@ -107,12 +107,13 @@ class TrainConfig(DefaultTrainingConfig):
     setup_mode = "single-arm-learned-gripper"
 
     def get_environment(self, fake_env=False, save_video=False, classifier=False, render_mode="human"):
-        # env = RAMEnv(
-        #     fake_env=fake_env,
-        #     save_video=save_video,
-        #     config=EnvConfig(),
-        # )
-        env = PandaPickCubeGymEnv(render_mode=render_mode, image_obs=True, hz=8, config=EnvConfig())
+        env = RAMEnv(
+            fake_env=fake_env,
+            save_video=save_video,
+            config=EnvConfig(),
+        )
+        # load vitual env from here
+        # env = PandaPickCubeGymEnv(render_mode=render_mode, image_obs=True, hz=8, config=EnvConfig())
         classifier=False
         # fake_env=True
         # env = GripperCloseEnv(env)
@@ -120,8 +121,8 @@ class TrainConfig(DefaultTrainingConfig):
             # env = SpacemouseIntervention(env)
             # env = KeyBoardIntervention2(env)
             env = TouchIntervention(env)
-        # env = RelativeFrame(env)
-        # env = Quat2EulerWrapper(env)
+        env = RelativeFrame(env)
+        env = Quat2EulerWrapper(env)
         env = SERLObsWrapper(env, proprio_keys=self.proprio_keys)
         env = ChunkingWrapper(env, obs_horizon=1, act_exec_horizon=None)
         if classifier:
@@ -148,9 +149,9 @@ class KeyBoardIntervention2(gym.ActionWrapper):
     def __init__(self, env, action_indices=None):
         super().__init__(env)
 
-        self.gripper_enabled = True
-        if self.action_space.shape == (6,):
-            self.gripper_enabled = False
+        self.gripper_enabled = False
+        # if self.action_space.shape == (6,):
+        #     self.gripper_enabled = False
 
         self.left, self.right = False, False
         self.action_indices = action_indices
@@ -273,9 +274,10 @@ class TouchIntervention(gym.ActionWrapper):
     def __init__(self, env, action_indices=None, position_scale=50, rotation_scale=50):
         super().__init__(env)
         
-        self.gripper_enabled = True
-        if self.action_space.shape == (6,):
-            self.gripper_enabled = False
+        # 判断action维度来决定是否enable夹爪
+        # self.gripper_enabled = True
+        # if self.action_space.shape == (6,):
+        #     self.gripper_enabled = False
             
         self.action_indices = action_indices
         self.intervened = False
@@ -294,16 +296,16 @@ class TouchIntervention(gym.ActionWrapper):
         # return expert_a, True
         
         # 处理夹爪控制
-        if self.gripper_enabled:
-            # 使用灰色按钮(buttons[0])控制夹爪
-            if buttons[0] == 1:
-                if self.gripper_state == 'open':
-                    self.gripper_state = 'close'
-                else:
-                    self.gripper_state = 'open'
-                    
-            gripper_action = np.random.uniform(0.9, 1, size=(1,)) if self.gripper_state == 'close' else np.random.uniform(-1, -0.9, size=(1,))
-            expert_a = np.concatenate((expert_a, gripper_action), axis=0)
+        # if self.gripper_enabled:
+        #     # 使用灰色按钮(buttons[0])控制夹爪
+        if buttons[0] == 1:
+            if self.gripper_state == 'open':
+                self.gripper_state = 'close'
+            else:
+                self.gripper_state = 'open'
+                
+        gripper_action = np.random.uniform(0.9, 1, size=(1,)) if self.gripper_state == 'close' else np.random.uniform(-1, -0.9, size=(1,))
+        expert_a = np.concatenate((expert_a, gripper_action), axis=0)
             
         # 使用白色按钮(buttons[1])切换干预状态
         if buttons[1] == 1:
@@ -311,6 +313,7 @@ class TouchIntervention(gym.ActionWrapper):
             # self.env.intervened = self.intervened
             # print(f"Intervention toggled: {self.intervened}")
             print("Intervention toggled: True")
+            print(expert_a, 'touch 介入')
             return expert_a, True
             
         # if self.action_indices is not None:
@@ -323,7 +326,7 @@ class TouchIntervention(gym.ActionWrapper):
         #     return expert_a, True
             
         else:
-            print("Intervention toggled: False")
+            # print("Intervention toggled: False")
             return action, False
         
             
