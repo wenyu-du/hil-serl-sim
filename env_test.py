@@ -60,5 +60,5 @@ while True:
 
     step += 1
 
-    if done:
-        obs, info = env.reset()
+    # if done:
+    #     obs, info = env.reset()

@@ -19,6 +19,7 @@ from serl_launcher.networks.reward_classifier import load_classifier_func
 from examples.experiments.config import DefaultTrainingConfig
 from examples.experiments.ram_insertion.wrapper import RAMEnv
 import gym
+import matplotlib.pyplot as plt
 
 class EnvConfig(DefaultEnvConfig):
     SERVER_URL = "http://127.0.0.1:5000/"
@@ -47,7 +48,7 @@ class EnvConfig(DefaultEnvConfig):
     RANDOM_XY_RANGE = 0.02
     RANDOM_RZ_RANGE = 0.05
     # ACTION_SCALE = (0.01, 0.06, 1)
-    ACTION_SCALE = (1, 1, 1)
+    ACTION_SCALE = (2, 1, 1)
     DISPLAY_IMAGE = True
     MAX_EPISODE_LENGTH = 100
     COMPLIANCE_PARAM = {
@@ -135,7 +136,7 @@ class TrainConfig(DefaultTrainingConfig):
 
 
 class TouchIntervention(gym.ActionWrapper):
-    def __init__(self, env, action_indices=None, position_scale=50, rotation_scale=50):
+    def __init__(self, env, action_indices=None, position_scale=50, rotation_scale=10):
         super().__init__(env)
         
         # 判断action维度来决定是否enable夹爪
@@ -154,10 +155,19 @@ class TouchIntervention(gym.ActionWrapper):
         )
         self.gripper_state = 'open'
         
+    def visualize_expert(self, expert_a):
+        plt.clf()  # 清除当前图形
+        plt.bar(range(len(expert_a)), expert_a)  # 绘制条形图
+        plt.ylim(-1.5, 1.5)  # 设置y轴范围
+        plt.xlabel('Expert Action Index')
+        plt.ylabel('Action Value')
+        plt.title('Expert Actions Visualization')
+        plt.pause(0.1)  # 暂停以更新图形
+
     def action(self, action: np.ndarray) -> np.ndarray:
         # 获取Touch设备的动作和按钮状态
         expert_a, buttons = self.touch_expert.get_action()
-        # return expert_a, True
+        
         
         # 处理夹爪控制
         # if self.gripper_enabled:
@@ -169,16 +179,21 @@ class TouchIntervention(gym.ActionWrapper):
                 self.gripper_state = 'open'
                 
         gripper_action = np.random.uniform(0.9, 1, size=(1,)) if self.gripper_state == 'close' else np.random.uniform(-1, -0.9, size=(1,))
-        expert_a = np.concatenate((expert_a, gripper_action), axis=0)
-            
+
+        expert_a_inversed = np.concatenate((expert_a, gripper_action), axis=0)
+        self.visualize_expert(expert_a_inversed)
+
         # 使用白色按钮(buttons[1])切换干预状态
         if buttons[1] == 1:
             # self.intervened = not self.intervened
             # self.env.intervened = self.intervened
             # print(f"Intervention toggled: {self.intervened}")
             print("Intervention toggled: True")
-            print(expert_a, 'touch 介入')
-            return expert_a, True
+
+            # return expert_a, True
+            
+            print(expert_a_inversed, 'touch 介入')
+            return expert_a_inversed, True
             
         # if self.action_indices is not None:
         #     filtered_expert_a = np.zeros_like(expert_a)
@@ -191,11 +206,12 @@ class TouchIntervention(gym.ActionWrapper):
             
         else:
             # print("Intervention toggled: False")
-            return action, False
+            return np.zeros(7), False
         
             
     def step(self, action):
         new_action, replaced = self.action(action)
+        # print(new_action)
         obs, rew, done, truncated, info = self.env.step(new_action)
         if replaced:
             info["intervene_action"] = new_action

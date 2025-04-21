@@ -215,6 +215,7 @@ class FrankaEnv(gym.Env):
         self.nextpos = self.currpos.copy()
         self.nextpos[:3] = self.nextpos[:3] + xyz_delta * self.action_scale[0]
 
+
         # GET ORIENTATION FROM ACTION
         self.nextpos[3:] = (
             Rotation.from_euler("xyz", action[3:6] * self.action_scale[1])
@@ -226,15 +227,22 @@ class FrankaEnv(gym.Env):
         # self._send_gripper_command(gripper_action)
         # self._send_pos_command(self.clip_safety_box(self.nextpos))
         self._send_pos_command(self.nextpos)
+        # print("发送给机械臂的pose是: ", self.nextpos)
+        
+        # print('received current pose before update:',self.currpos)
+
 
         self.curr_path_length += 1
         dt = time.time() - start_time
         time.sleep(max(0, (1.0 / self.hz) - dt))
 
         self._update_currpos()
+        # print('received current pose after update:',self.currpos)
+
         ob = self._get_obs()
         reward = self.compute_reward(ob)
-        done = self.curr_path_length >= self.max_episode_length or reward or self.terminate
+        done = False
+        # done = self.curr_path_length >= self.max_episode_length or reward or self.terminate
         return ob, int(reward), done, False, {"succeed": reward}
 
     def compute_reward(self, obs) -> bool:
@@ -444,6 +452,7 @@ class FrankaEnv(gym.Env):
         """
         ps = requests.post(self.url + "getstate").json()
         self.currpos = np.array(ps["pose"])
+        # print('received current pose is:',self.currpos)
         self.currvel = np.array(ps["vel"])
 
         self.currforce = np.array(ps["force"])
